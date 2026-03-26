@@ -1,0 +1,55 @@
+/* Notifications.css – Additional styles for Notifications page */
+
+/* Allow message column to wrap long text */
+.notification-message {
+  max-width: 300px;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* Action buttons container */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Mark as read button (green) */
+.btn-action.mark-read {
+  color: #059669;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btn-action.mark-read:hover {
+  background-color: #d1fae5;
+}
+
+/* Delete button (red) */
+.btn-action.delete {
+  color: #b91c1c;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btn-action.delete:hover {
+  background-color: #fee2e2;
+}
+
+/* Responsive: stack buttons on very small screens */
+@media (max-width: 480px) {
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

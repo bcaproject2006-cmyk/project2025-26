@@ -1,0 +1,61 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Add this to your main CSS file or create a z-index.css */
+:root {
+  /* Z-Index Scale */
+  --z-negative: -1;
+  --z-elevate: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-tooltip: 600;
+  --z-toast: 700;
+  --z-loader: 800;
+  --z-max: 9999;
+}
+
+/* Apply to components */
+.sidebar {
+  z-index: var(--z-fixed); /* 300 */
+}
+
+.navbar {
+  z-index: var(--z-sticky); /* 200 - but we need it higher than sidebar */
+  position: sticky;
+  top: 0;
+}
+
+.navbar {
+  z-index: calc(var(--z-fixed) + 100); /* 400 - higher than sidebar */
+}
+
+/* Dropdowns should be highest */
+.notifications-dropdown,
+.search-dropdown,
+.user-dropdown {
+  z-index: var(--z-modal); /* 400 */
+}
+
+/* Mobile sidebar overlay */
+.sidebar-overlay {
+  z-index: var(--z-modal); /* 400 */
+}
+
+/* Modal dialogs */
+.modal {
+  z-index: var(--z-modal); /* 400 */
+}

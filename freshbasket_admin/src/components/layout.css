@@ -1,0 +1,191 @@
+/* layout.css - Complete layout styling */
+
+/* Global App Container */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  transition: background-color 0.3s ease;
+}
+
+.app.dark {
+  background-color: #0f172a;
+}
+
+/* App Container for sidebar + content */
+.app-container {
+  display: flex;
+  flex: 1;
+  position: relative;
+  margin-top: 70px; /* Navbar height */
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 260px; /* Sidebar width when open */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: calc(100vh - 70px);
+  overflow-y: auto;
+  background: #f8fafc;
+}
+
+.dark .main-content {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+/* When sidebar is closed */
+.main-content.sidebar-closed {
+  margin-left: 0;
+}
+
+/* When sidebar is open */
+.main-content.sidebar-open {
+  margin-left: 260px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+    padding: 15px;
+  }
+  
+  .main-content.sidebar-open {
+    margin-left: 0;
+    transform: translateX(260px);
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 70px;
+    bottom: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  
+  .main-content.sidebar-open::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    pointer-events: all;
+    z-index: 1;
+  }
+  
+  .main-content.sidebar-open > * {
+    position: relative;
+    z-index: 2;
+    pointer-events: all;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    margin-top: 60px; /* Mobile navbar height */
+  }
+  
+  .main-content {
+    padding: 15px;
+    min-height: calc(100vh - 60px);
+  }
+  
+  .main-content.sidebar-open {
+    transform: translateX(280px);
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 10px;
+  }
+}
+
+/* Scrollbar styling for main content */
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #27ae60;
+  border-radius: 4px;
+}
+
+.dark .main-content::-webkit-scrollbar-track {
+  background: #2d3748;
+}
+
+.dark .main-content::-webkit-scrollbar-thumb {
+  background: #2ecc71;
+}
+
+/* Content Card Styling */
+.content-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.dark .content-card {
+  background: #1a202c;
+  border-color: #2d3748;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dark .page-header {
+  border-bottom-color: #2d3748;
+}
+
+.page-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.dark .page-header h1 {
+  color: #e2e8f0;
+}
+
+.page-header p {
+  color: #718096;
+  margin: 8px 0 0 0;
+}
+
+.dark .page-header p {
+  color: #a0aec0;
+}
+
+/* Loading State */
+.app-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.dark .app-loading {
+  background: #0f172a;
+}

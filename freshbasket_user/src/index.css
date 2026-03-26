@@ -1,0 +1,25 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Adjust this value based on your navbar's actual height */
+.auth-page,
+.home,
+.products-page,
+.cart-page,
+.checkout-page,
+.profile-page,
+.orders-page,
+.addresses-page {
+  padding-top: 80px; /* or margin-top, whichever works with your layout */
+}

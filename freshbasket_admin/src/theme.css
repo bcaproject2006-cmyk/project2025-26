@@ -1,0 +1,25 @@
+/* =========================
+   FreshBasket Theme Tokens
+   DO NOT touch casually
+========================= */
+
+:root {
+  /* Brand */
+  --green: #1E7F5C;
+  --green-dark: #16644A;
+  --green-glow: rgba(34, 197, 94, 0.35);
+
+  /* ✅ Light green background (LOCK THIS) */
+  --bg: #EEF6EA;
+
+  /* Neutrals */
+  --dark: #1F2933;
+  --darker: #111827;
+  --white: #FFFFFF;
+  --muted: #94A3B8;
+  --border: #E5E7EB;
+
+  --radius: 12px;
+  --shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
