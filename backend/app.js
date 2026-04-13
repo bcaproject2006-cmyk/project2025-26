@@ -24,9 +24,9 @@ const sendEmail = require('./config/email');
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+// app.use(bodyParser.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use('/public', require('express').static('public'));
 
 app.use('/uploads', express.static('uploads'));

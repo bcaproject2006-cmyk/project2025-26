@@ -36,3 +36,9 @@ uploads/
 backend/invoices/
 backend/public/invoices/
 *.zip
+
+# documents
+*.pdf
+*.docx
+*.ppt
+*.zip
