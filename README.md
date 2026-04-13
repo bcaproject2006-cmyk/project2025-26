@@ -43,7 +43,7 @@ A full-stack web application for managing a vegetable and fruit shop, including 
 
 **Other Integrations:**
 - WhatsApp API
-- (Add Razorpay if you used it)
+- Razorpay
 
 ---
 
