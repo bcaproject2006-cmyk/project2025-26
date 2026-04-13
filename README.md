@@ -54,32 +54,38 @@ A full-stack web application for managing a vegetable and fruit shop, including 
 ```bash
 git clone https://github.com/bcaproject2006-cmyk/project2025-26.git
 cd project2025-26
+```
 
 ### 2️⃣ Setup Backend
 ```bash
 cd backend
 npm install
 npm start
+```
 
 ### 3️⃣ Setup Admin Panel
 ```bash
 cd freshbasket_admin
 npm install
 npm start
+```
 
 ### 4️⃣ Setup User Panel
 ```bash
 cd freshbasket_user
 npm install
 npm start
+```
 
 ### 5️⃣ Setup Database
 Import SQL file from:
 ```bash
 Database/FreshBasket_Final_DB.sql
+```
 
 ## 🎥 Demo Video
 👉 https://drive.google.com/drive/my-drive
+
 
 ## 👨‍💻 Author
 Archi Mistry
