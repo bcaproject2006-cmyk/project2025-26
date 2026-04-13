@@ -63,11 +63,12 @@ cd freshbasket_user
 npm install
 npm start
 
+
+the video of freshbasket project is below in the drive :
+https://drive.google.com/drive/my-drive
+
 ### 1. Clone the repository
 
 ```bash
 git clone https://github.com/bcaproject2006-cmyk/project2025-26.git
 cd project2025-26
-
-the video of freshbasket project is below in the drive :
-https://drive.google.com/drive/my-drive
