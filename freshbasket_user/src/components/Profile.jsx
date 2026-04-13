@@ -16,7 +16,9 @@ import {
   faExclamationCircle,
   faStar,
   faTrophy,
-  faHistory
+  faHistory,
+  faBell,
+  faCommentDots
 } from '@fortawesome/free-solid-svg-icons';
 import './Profile.css';
 
@@ -28,6 +30,10 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // WhatsApp opt-in state
+  const [whatsappOptIn, setWhatsappOptIn] = useState(false);
+  const [updatingWhatsapp, setUpdatingWhatsapp] = useState(false);
 
   // Profile form state
   const [isEditing, setIsEditing] = useState(false);
@@ -52,9 +58,9 @@ const Profile = () => {
   // Helper to get token from localStorage
   const getAuthToken = () => localStorage.getItem('token');
 
-  // Fetch profile on mount
+  // Fetch profile and WhatsApp status on mount
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileAndPreferences = async () => {
       try {
         setLoading(true);
         const token = getAuthToken();
@@ -63,15 +69,12 @@ const Profile = () => {
           return;
         }
 
-        // ✅ Correct endpoint: /api/customers/profile
-        const response = await axios.get(`${API_BASE_URL}/customers/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        // Fetch customer profile
+        const profileResponse = await axios.get(`${API_BASE_URL}/customers/profile`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
 
-        const userData = response.data; // Backend returns the customer object
-
+        const userData = profileResponse.data;
         setUser({
           ...userData,
           phone_no: userData.phone_no || userData.phone || '',
@@ -86,12 +89,21 @@ const Profile = () => {
           address: userData.address || ''
         });
 
-        // Optionally store fresh data in localStorage
         localStorage.setItem('customer', JSON.stringify(userData));
+
+        // Fetch WhatsApp opt-in status
+        try {
+          const whatsappResponse = await axios.get(`${API_BASE_URL}/customers/whatsapp/status`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setWhatsappOptIn(whatsappResponse.data.whatsapp_opt_in || false);
+        } catch (whatsappErr) {
+          console.error('Error fetching WhatsApp status:', whatsappErr);
+          // Default to false if endpoint fails
+          setWhatsappOptIn(false);
+        }
       } catch (err) {
         console.error('Error fetching profile:', err);
-
-        // Handle 401/403 by redirecting to login
         if (err.response?.status === 401 || err.response?.status === 403) {
           localStorage.removeItem('token');
           localStorage.removeItem('customer');
@@ -107,11 +119,37 @@ const Profile = () => {
       }
     };
 
-    fetchProfile();
+    fetchProfileAndPreferences();
   }, [navigate]);
 
-  // ... rest of the component (input handlers, validation, update, password change, render) remains the same ...
-  // I'll include the rest below for completeness, but it's unchanged from your original.
+  // Handle WhatsApp opt-in toggle
+  const handleWhatsAppToggle = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    setUpdatingWhatsapp(true);
+    const endpoint = whatsappOptIn ? 'opt-out' : 'opt-in';
+
+    try {
+      await axios.post(
+        `${API_BASE_URL}/customers/whatsapp/${endpoint}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setWhatsappOptIn(!whatsappOptIn);
+      setSuccess(`WhatsApp notifications ${!whatsappOptIn ? 'enabled' : 'disabled'} successfully!`);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error('Error updating WhatsApp preference:', err);
+      setError('Failed to update WhatsApp preference. Please try again.');
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setUpdatingWhatsapp(false);
+    }
+  };
 
   // Handle input changes for profile form
   const handleInputChange = (e) => {
@@ -137,7 +175,7 @@ const Profile = () => {
     return errors;
   };
 
-  // Handle profile update using PUT /customers/profile
+  // Handle profile update
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     const errors = validateProfileForm();
@@ -213,7 +251,7 @@ const Profile = () => {
     return errors;
   };
 
-  // Handle password change (adjust endpoint if needed)
+  // Handle password change
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     const errors = validatePasswordForm();
@@ -233,7 +271,6 @@ const Profile = () => {
         return;
       }
 
-      // Assuming this endpoint exists – adjust if different
       await axios.post(`${API_BASE_URL}/customers/change-password`, {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
@@ -438,6 +475,46 @@ const Profile = () => {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Notification Preferences Section - WhatsApp Opt-in */}
+        <div className="profile-card notification-card">
+          <div className="card-header">
+            <h2>
+              <FontAwesomeIcon icon={faBell} />
+              Notification Preferences
+            </h2>
+          </div>
+          <div className="notification-content">
+            <div className="notification-item">
+              <div className="notification-icon">
+                <FontAwesomeIcon icon={faCommentDots} style={{ color: '#25D366' }} />
+              </div>
+              <div className="notification-info">
+                <h3>WhatsApp Offers & Updates</h3>
+                <p>Receive exclusive discounts, new product alerts, and seasonal offers directly on WhatsApp at <strong>{user?.phone_no || 'your registered number'}</strong>.</p>
+              </div>
+              <div className="notification-toggle">
+                <label className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={whatsappOptIn}
+                    onChange={handleWhatsAppToggle}
+                    disabled={updatingWhatsapp}
+                  />
+                  <span className="toggle-slider"></span>
+                </label>
+                {updatingWhatsapp && (
+                  <span className="toggle-loading">
+                    <FontAwesomeIcon icon={faSpinner} spin />
+                  </span>
+                )}
+              </div>
+            </div>
+            <p className="notification-note">
+              You can change this preference anytime. We respect your privacy and will never spam you.
+            </p>
+          </div>
         </div>
 
         {/* Password Section */}

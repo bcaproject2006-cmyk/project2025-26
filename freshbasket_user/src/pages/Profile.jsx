@@ -7,10 +7,13 @@ import './Auth.css';
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [whatsappOptIn, setWhatsappOptIn] = useState(false);
+  const [updatingWhatsapp, setUpdatingWhatsapp] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProfile();
+    fetchWhatsAppStatus();
   }, [navigate]);
 
   const fetchProfile = async () => {
@@ -22,16 +25,13 @@ const Profile = () => {
     }
 
     try {
-      // Fetch latest customer data from API
       const response = await axios.get('http://localhost:8000/api/customers/profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(response.data);
-      // Update localStorage with fresh data
       localStorage.setItem('customer', JSON.stringify(response.data));
     } catch (error) {
       console.error('Error fetching profile:', error);
-      // Fallback to stored data
       try {
         setUser(JSON.parse(storedCustomer));
       } catch (e) {
@@ -39,6 +39,44 @@ const Profile = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWhatsAppStatus = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await axios.get('http://localhost:8000/api/customers/whatsapp/status', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setWhatsappOptIn(response.data.whatsapp_opt_in || false);
+    } catch (error) {
+      console.error('Error fetching WhatsApp status:', error);
+      // Default to false if API fails
+      setWhatsappOptIn(false);
+    }
+  };
+
+  const handleWhatsAppToggle = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    setUpdatingWhatsapp(true);
+    const endpoint = whatsappOptIn ? 'opt-out' : 'opt-in';
+    
+    try {
+      await axios.post(
+        `http://localhost:8000/api/customers/whatsapp/${endpoint}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setWhatsappOptIn(!whatsappOptIn);
+    } catch (error) {
+      console.error('Error updating WhatsApp preference:', error);
+      alert('Failed to update WhatsApp preference. Please try again.');
+    } finally {
+      setUpdatingWhatsapp(false);
     }
   };
 
@@ -111,6 +149,29 @@ const Profile = () => {
                     {new Date().toLocaleDateString()}
                   </span>
                 </div>
+              </div>
+
+              {/* WhatsApp Notification Preferences */}
+              <div className="profile-section">
+                <h4 className="profile-section-title">Notification Preferences</h4>
+                <div className="profile-field whatsapp-opt-in-field">
+                  <label className="whatsapp-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={whatsappOptIn}
+                      onChange={handleWhatsAppToggle}
+                      disabled={updatingWhatsapp}
+                    />
+                    <span className="checkbox-text">
+                      <span className="whatsapp-icon">💬</span>
+                      Receive special offers and updates on WhatsApp
+                    </span>
+                  </label>
+                  {updatingWhatsapp && <span className="updating-indicator">Updating...</span>}
+                </div>
+                <p className="whatsapp-note">
+                  We'll send you exclusive discounts, new product alerts, and seasonal offers directly to your WhatsApp number: <strong>{user.phone_no}</strong>
+                </p>
               </div>
 
               <div className="profile-actions">

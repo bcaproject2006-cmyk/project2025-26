@@ -11,6 +11,9 @@ const nodemailer = require('nodemailer');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const multer = require('multer');
+const whatsappService = require('./config/whatsapp');
+console.log("Current directory:", __dirname);
+
 
 // Database connection (mysql2 promise enabled)
 const connection = require('./db');
@@ -24,6 +27,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use('/public', require('express').static('public'));
 
 app.use('/uploads', express.static('uploads'));
 
@@ -877,14 +881,6 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
     // Create order
     const orderId = await insertOrderAndItems(db, req.body, items, shipping_address);
 
-await db.query(
-  `INSERT INTO notifications (user_id, message, created_at)
-   VALUES (?, ?, NOW())`,
-  [
-    1, // admin id
-    `New order received: #${orderId}`
-  ]
-);
     // ===== FIND LOYALTY MEMBER =====
     const [memberRows] = await db.query(
       "SELECT member_id FROM loyalty_members WHERE email = ?",
@@ -955,22 +951,41 @@ await db.query(
     );
 
     await db.commit();
+    // 🔔 Insert notification AFTER successful order commit
+try {
+  console.log("🔔 Inserting notification for order:", orderId);
+
+  const [notifResult] = await db.query(
+    `INSERT INTO notifications (user_id, message, status, created_at)
+     VALUES (?, ?, ?, NOW())`,
+    [
+      1, // admin user id
+      `New order received: #${orderId}`,
+      'unread'
+    ]
+  );
+
+  console.log("✅ Notification inserted:", notifResult);
+
+} catch (notifError) {
+  console.error("❌ Notification insert failed:", notifError);
+}
 
     // ✅ GENERATE INVOICE BEFORE RESPONSE
 try {
   console.log("🚀 Generating invoice...");
 
-const pdfPath = await generateInvoice(
-  orderId,
-  customer,
-  itemsWithNames,
-  {
-    total_amount,
-    delivery_fee,
-    discount,
-    shipping_address
-  }
-);
+  const pdfPath = await generateInvoice(
+    orderId,
+    customer,
+    itemsWithNames,
+    {
+      total_amount,
+      delivery_fee,
+      discount,
+      shipping_address
+    }
+  );
 
   await db.query(
     "INSERT INTO invoices (order_id, invoice_date, invoice_pdf_path) VALUES (?, ?, ?)",
@@ -980,12 +995,58 @@ const pdfPath = await generateInvoice(
   console.log("✅ Invoice saved in DB");
 
   await sendEmail(
-  customer.email,
-  "Order Invoice",
-  "Thank you for your order!",
-  null,               // HTML (not used)
-  pdfPath             // attachment path
-);
+    customer.email,
+    "Order Invoice",
+    "Thank you for your order!",
+    null,
+    pdfPath
+  );
+
+// 🔐 Generate Delivery OTP
+const deliveryOtp = Math.floor(1000 + Math.random() * 9000);
+
+// 💰 Payment Mode Fix
+const paymentModeText = payment_mode === 'cod'
+  ? 'Cash on Delivery'
+  : 'Prepaid';
+
+// 🧾 Items Summary
+const itemsSummary = itemsWithNames
+  .map(item => `• ${item.product_name} x${item.quantity}`)
+  .join('\n');
+
+// 📩 Final WhatsApp Message
+const message = `
+🛒 *FreshBasket Order Confirmed!*
+
+Hi ${customer.name},
+
+Thank you for your order! 🙌
+
+📦 *Order ID:* #${orderId}  
+💰 *Payment:* ${paymentModeText}  
+💵 *Total:* ₹${total_amount}  
+
+🧾 *Items:*
+${itemsSummary}
+
+📍 *Delivery Address:*  
+${shipping_address}
+
+🔐 *Delivery OTP:* ${deliveryOtp}
+
+📧 Your invoice has been sent to your email.
+
+🚚 Our delivery partner will contact you soon.
+
+_Thank you for choosing FreshBasket!_
+`;
+
+await whatsappService.sendMessage(customer.phone_no, message);
+
+console.log("✅ WhatsApp order message sent");
+
+  console.log("✅ WhatsApp invoice sent");
 
 } catch (err) {
   console.error("❌ INVOICE ERROR:", err);
@@ -1009,7 +1070,18 @@ res.status(201).json({
   }
 
 });
+app.get('/view-invoice/:fileName', (req, res) => {
+  const filePath = path.join(__dirname, 'public/invoices', req.params.fileName);
 
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send('File not found');
+  }
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'inline'); // 👈 THIS IS KEY
+
+  fs.createReadStream(filePath).pipe(res);
+});
 // GET all orders (admin: all; customer: own)
 app.get('/api/orders', authenticateToken, async (req, res) => {
 
@@ -2609,45 +2681,231 @@ app.get('/api/loyalty/offers', (req, res) => {
 });
 
 
-/* =========================
-   CREATE OFFER
-   ========================= */
-app.post('/api/loyalty/offers', (req, res) => {
+// Add this import at the top of your server.js (if not already present)
 
-  const { name, type, discount, minPurchase, startDate, validUntil, totalOffers } = req.body;
 
+// =========================
+// CREATE OFFER (with WhatsApp notifications)
+// =========================
+app.post('/api/loyalty/offers', async (req, res) => {
+  const db = connection.promise();
+  const { 
+    name, type, discount, minPurchase, 
+    startDate, validUntil, totalOffers,
+    notify_customers = true   // Optional: set to false to skip notifications
+  } = req.body;
+
+  // Validation
   if (!name || !type || !discount || !startDate || !validUntil) {
     return res.status(400).json({ message: 'Required fields missing' });
   }
 
-  const timestamp = Date.now().toString().slice(-4);
-  const random = Math.floor(Math.random() * 900 + 100);
-  const offerCode = "OFF-" + timestamp + random;
+  try {
+    // Generate unique offer code
+    const timestamp = Date.now().toString().slice(-4);
+    const random = Math.floor(Math.random() * 900 + 100);
+    const offerCode = "OFF-" + timestamp + random;
 
-  const sql = `
-  INSERT INTO offers
-  (offer_code, offer_name, offer_type, discount_value, min_purchase, start_date, valid_until, total_offers, status, redeemed)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', 0)
-  `;
+    // Insert offer into database
+    const sql = `
+      INSERT INTO offers
+      (offer_code, offer_name, offer_type, discount_value, min_purchase, 
+       start_date, valid_until, total_offers, status, redeemed)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', 0)
+    `;
 
-  connection.query(
-    sql,
-    [offerCode, name, type, discount, minPurchase || 0, startDate, validUntil, totalOffers || null],
-    (err) => {
+    await db.query(sql, [
+      offerCode, name, type, discount, minPurchase || 0, 
+      startDate, validUntil, totalOffers || null
+    ]);
 
-      if (err) return res.status(500).json({ error: err.message });
+    // Prepare offer object for WhatsApp notification
+    const newOffer = {
+      offer_code: offerCode,
+      offer_name: name,
+      offer_type: type,
+      discount_value: discount,
+      min_purchase: minPurchase || 0,
+      valid_until: validUntil
+    };
 
-      res.json({
-        message: 'Offer created successfully',
-        offer_code: offerCode
-      });
+    let notificationResults = [];
+    let notificationsSent = 0;
 
+    // Send WhatsApp notifications if requested
+    if (notify_customers) {
+      try {
+        // Fetch customers who have opted in for WhatsApp notifications
+        const [customers] = await db.query(`
+          SELECT customer_id, name, phone_no, whatsapp_opt_in 
+          FROM customers 
+          WHERE whatsapp_opt_in = TRUE 
+            AND phone_no IS NOT NULL 
+            AND phone_no != ''
+        `);
+
+        if (customers.length > 0) {
+          console.log(`📱 Broadcasting offer to ${customers.length} customers...`);
+          
+          // Send notifications with a small delay between each to avoid rate limiting
+          for (const customer of customers) {
+            try {
+              const result = await whatsappService.sendOfferNotification(customer, newOffer);
+              notificationResults.push({ 
+                customer_id: customer.customer_id, 
+                success: true, 
+                ...result 
+              });
+              notificationsSent++;
+              
+              // Add 500ms delay between messages (WhatsApp rate limit protection)
+              await new Promise(resolve => setTimeout(resolve, 500));
+            } catch (error) {
+              console.error(`Failed to send WhatsApp to customer ${customer.customer_id}:`, error.message);
+              notificationResults.push({ 
+                customer_id: customer.customer_id, 
+                success: false, 
+                error: error.message 
+              });
+            }
+          }
+          
+          console.log(`✅ Offer notifications sent: ${notificationsSent}/${customers.length}`);
+        } else {
+          console.log('ℹ️ No customers opted in for WhatsApp notifications');
+        }
+      } catch (notifyError) {
+        // Log but don't fail the offer creation
+        console.error('❌ WhatsApp notification error:', notifyError);
+      }
     }
-  );
 
+    // Return success response with notification stats
+    res.status(201).json({
+      message: 'Offer created successfully',
+      offer_code: offerCode,
+      notifications_sent: notificationsSent,
+      total_opted_in_customers: notificationResults.length
+    });
+
+  } catch (error) {
+    console.error('Error creating offer:', error);
+    res.status(500).json({ error: 'Database error', details: error.message });
+  }
+});
+// Add to your server.js
+
+// Opt-in to WhatsApp notifications
+app.post('/api/customers/whatsapp/opt-in', authenticateToken, async (req, res) => {
+  const db = connection.promise();
+  const customerId = req.user.id;
+
+  try {
+    await db.query(
+      'UPDATE customers SET whatsapp_opt_in = TRUE WHERE customer_id = ?',
+      [customerId]
+    );
+
+    res.json({ message: 'Successfully opted in to WhatsApp notifications' });
+  } catch (error) {
+    console.error('Opt-in error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
+// Opt-out from WhatsApp notifications
+app.post('/api/customers/whatsapp/opt-out', authenticateToken, async (req, res) => {
+  const db = connection.promise();
+  const customerId = req.user.id;
 
+  try {
+    await db.query(
+      'UPDATE customers SET whatsapp_opt_in = FALSE WHERE customer_id = ?',
+      [customerId]
+    );
+
+    res.json({ message: 'Successfully opted out from WhatsApp notifications' });
+  } catch (error) {
+    console.error('Opt-out error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get WhatsApp opt-in status
+app.get('/api/customers/whatsapp/status', authenticateToken, async (req, res) => {
+  const db = connection.promise();
+  const customerId = req.user.id;
+
+  try {
+    const [rows] = await db.query(
+      'SELECT whatsapp_opt_in FROM customers WHERE customer_id = ?',
+      [customerId]
+    );
+
+    res.json({ 
+      whatsapp_opt_in: rows.length > 0 ? rows[0].whatsapp_opt_in : false 
+    });
+  } catch (error) {
+    console.error('Status error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+// Test endpoint - send offer to specific customer
+app.post('/api/loyalty/offers/:code/test-notification', authenticateToken, async (req, res) => {
+  const db = connection.promise();
+  const { code } = req.params;
+  const { customer_id } = req.body;
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+
+  try {
+    // Get offer details
+    const [offers] = await db.query(
+      'SELECT * FROM offers WHERE offer_code = ?',
+      [code]
+    );
+
+    if (offers.length === 0) {
+      return res.status(404).json({ error: 'Offer not found' });
+    }
+
+    // Get customer details
+    const [customers] = await db.query(
+      'SELECT customer_id, name, phone_no FROM customers WHERE customer_id = ?',
+      [customer_id]
+    );
+
+    if (customers.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    const customer = customers[0];
+    const offer = offers[0];
+
+    // Send WhatsApp notification
+    const result = await whatsappService.sendOfferNotification(customer, offer);
+
+    res.json({ 
+      message: 'Test notification sent successfully',
+      result 
+    });
+
+  } catch (error) {
+    console.error('Test notification error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post('/api/test-whatsapp', authenticateToken, async (req, res) => {
+  const { phone } = req.body;
+  try {
+    const result = await whatsappService.sendMessage(phone, 'Test from FreshBasket!');
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message, code: err.code });
+  }
+});
 /* =========================
    UPDATE OFFER
    ========================= */
@@ -2779,6 +3037,7 @@ app.get('/api/waste', (req, res) => {
     LEFT JOIN categories c ON p.category_id = c.category_id
     ORDER BY w.waste_date DESC
   `;
+
   connection.query(sql, (err, results) => {
     if (err) {
       console.error('Error fetching waste records:', err);
@@ -2790,54 +3049,140 @@ app.get('/api/waste', (req, res) => {
 
 // CREATE waste entry
 app.post('/api/waste', (req, res) => {
-  const { product_id, product_name, quantity, unit, waste_reason, disposal_method, waste_date, cost_loss, notes } = req.body;
+  const {
+    product_id,
+    quantity,
+    unit,
+    waste_reason,
+    disposal_method,
+    waste_date,
+    cost_loss,
+    notes
+  } = req.body;
 
-  const sql = `INSERT INTO waste_tracking 
-    (product_id, product_name, quantity, unit, waste_reason, disposal_method, waste_date, cost_loss, notes) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  if (!product_id || !quantity || !unit || !waste_date) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
 
-  connection.query(
-    sql,
-    [product_id, product_name, quantity, unit, waste_reason, disposal_method, waste_date, cost_loss, notes],
-    (err, result) => {
-      if (err) {
-        console.error('Error inserting waste:', err);
-        return res.status(500).json({ error: err.message });
-      }
-      res.status(201).json({ 
-        message: 'Waste entry added successfully', 
-        waste_id: result.insertId 
-      });
+  // Fetch product name from DB directly
+  const getProductSql = `SELECT product_name FROM products WHERE product_id = ?`;
+
+  connection.query(getProductSql, [product_id], (err, productResult) => {
+    if (err) {
+      console.error('Error fetching product:', err);
+      return res.status(500).json({ error: err.message });
     }
-  );
+
+    if (productResult.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    const product_name = productResult[0].product_name;
+
+    const insertSql = `INSERT INTO waste_tracking 
+      (product_id, product_name, quantity, unit, waste_reason, disposal_method, waste_date, cost_loss, notes) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    connection.query(
+      insertSql,
+      [
+        product_id,
+        product_name,
+        quantity,
+        unit,
+        waste_reason || null,
+        disposal_method || null,
+        waste_date,
+        cost_loss || 0,
+        notes || null
+      ],
+      (err, result) => {
+        if (err) {
+          console.error('Error inserting waste:', err);
+          return res.status(500).json({ error: err.message });
+        }
+
+        res.status(201).json({
+          message: 'Waste entry added successfully',
+          waste_id: result.insertId
+        });
+      }
+    );
+  });
 });
 
-//update waste
+// UPDATE waste entry
 app.put('/api/waste/:id', (req, res) => {
   const { id } = req.params;
-  const { product_id, product_name, quantity, unit, waste_reason, disposal_method, waste_date, cost_loss, notes } = req.body;
+  const {
+    product_id,
+    quantity,
+    unit,
+    waste_reason,
+    disposal_method,
+    waste_date,
+    cost_loss,
+    notes
+  } = req.body;
 
-  const safeProductId = product_id === '' ? null : product_id;
-  const safeCostLoss = cost_loss === '' ? null : cost_loss;
+  if (!product_id || !quantity || !unit || !waste_date) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
 
-  const sql = `UPDATE waste_tracking SET 
-    product_id = ?, product_name = ?, quantity = ?, unit = ?, waste_reason = ?, disposal_method = ?, waste_date = ?, cost_loss = ?, notes = ?
-    WHERE waste_id = ?`;
+  const getProductSql = `SELECT product_name FROM products WHERE product_id = ?`;
 
-  connection.query(
-    sql,
-    [safeProductId, product_name, quantity, unit, waste_reason, disposal_method, waste_date, safeCostLoss, notes, id],
-    (err, result) => {
-      if (err) {
-        console.error('Error updating waste:', err);
-        return res.status(500).json({ error: err.message });
-      }
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Waste entry not found' });
-      }
-      res.json({ message: 'Waste entry updated successfully' });
+  connection.query(getProductSql, [product_id], (err, productResult) => {
+    if (err) {
+      console.error('Error fetching product:', err);
+      return res.status(500).json({ error: err.message });
     }
-  );
+
+    if (productResult.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    const product_name = productResult[0].product_name;
+
+    const sql = `UPDATE waste_tracking SET 
+      product_id = ?, 
+      product_name = ?, 
+      quantity = ?, 
+      unit = ?, 
+      waste_reason = ?, 
+      disposal_method = ?, 
+      waste_date = ?, 
+      cost_loss = ?, 
+      notes = ?
+      WHERE waste_id = ?`;
+
+    connection.query(
+      sql,
+      [
+        product_id,
+        product_name,
+        quantity,
+        unit,
+        waste_reason || null,
+        disposal_method || null,
+        waste_date,
+        cost_loss || 0,
+        notes || null,
+        id
+      ],
+      (err, result) => {
+        if (err) {
+          console.error('Error updating waste:', err);
+          return res.status(500).json({ error: err.message });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Waste entry not found' });
+        }
+
+        res.json({ message: 'Waste entry updated successfully' });
+      }
+    );
+  });
 });
 
 // DELETE waste entry
@@ -2845,14 +3190,17 @@ app.delete('/api/waste/:id', (req, res) => {
   const { id } = req.params;
 
   const sql = 'DELETE FROM waste_tracking WHERE waste_id = ?';
+
   connection.query(sql, [id], (err, result) => {
     if (err) {
       console.error('Error deleting waste:', err);
       return res.status(500).json({ error: err.message });
     }
+
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Waste entry not found' });
     }
+
     res.json({ message: 'Waste entry deleted successfully' });
   });
 });

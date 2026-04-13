@@ -10,10 +10,6 @@ const Dashboard = () => {
     totalRevenue: 0,
     totalCustomers: 0,
     totalProducts: 0,
-    orderGrowth: 0,
-    revenueGrowth: 0,
-    customerGrowth: 0,
-    productGrowth: 0,
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [pendingReturns, setPendingReturns] = useState([]);
@@ -23,10 +19,8 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
-  // Helper to safely get token
   const getToken = () => localStorage.getItem("token");
 
-  // Formatting helpers
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -58,7 +52,6 @@ const Dashboard = () => {
     }
   };
 
-  // Fetch all dashboard data
   const fetchDashboardData = async () => {
     setLoading(true);
     setError("");
@@ -114,10 +107,6 @@ const Dashboard = () => {
         totalRevenue,
         totalCustomers,
         totalProducts,
-        orderGrowth: 0,
-        revenueGrowth: 0,
-        customerGrowth: 0,
-        productGrowth: 0,
       });
 
       // Recent orders
@@ -156,29 +145,33 @@ const Dashboard = () => {
         .slice(0, 5);
       setTopProducts(top);
 
-      // Sales data (monthly)
+      // Sales data: fixed last 6 months using UTC to avoid timezone shifts
       const monthlySales = {};
       orders.forEach((order) => {
         if (!order.order_date) return;
+        // Use UTC to prevent day-boundary issues
         const date = new Date(order.order_date);
-        const monthYear = `${date.getFullYear()}-${String(
-          date.getMonth() + 1
-        ).padStart(2, "0")}`;
-        if (!monthlySales[monthYear]) {
-          monthlySales[monthYear] = 0;
-        }
-        monthlySales[monthYear] += parseFloat(order.total_amount || 0);
+        const year = date.getUTCFullYear();
+        const month = date.getUTCMonth() + 1;
+        const monthYear = `${year}-${String(month).padStart(2, "0")}`;
+        monthlySales[monthYear] = (monthlySales[monthYear] || 0) + parseFloat(order.total_amount || 0);
       });
 
-      const sortedMonths = Object.keys(monthlySales).sort();
-      const last6Months = sortedMonths.slice(-6);
-      const salesArray = last6Months.map((month) => ({
-        month: new Date(month + "-01").toLocaleDateString("en-IN", {
-          month: "short",
-        }),
-        sales: monthlySales[month],
-      }));
-      setSalesData(salesArray);
+      // Generate last 6 months (including current month) based on UTC today
+      const today = new Date();
+      const utcToday = new Date(Date.UTC(today.getFullYear(), today.getMonth(), 1));
+      const last6Months = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(Date.UTC(utcToday.getFullYear(), utcToday.getMonth() - i, 1));
+        const monthYear = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+        const monthName = d.toLocaleDateString("en-IN", { month: "short", timeZone: "UTC" });
+        last6Months.push({
+          month: monthName,
+          monthYear: monthYear,
+          sales: monthlySales[monthYear] || 0,
+        });
+      }
+      setSalesData(last6Months);
 
       // Category distribution
       const categoryMap = Object.fromEntries(
@@ -205,7 +198,6 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Pie chart helper: generate SVG path for a slice
   const describeSlice = (cx, cy, radius, startAngle, endAngle) => {
     const startX = cx + radius * Math.cos(startAngle);
     const startY = cy + radius * Math.sin(startAngle);
@@ -215,7 +207,6 @@ const Dashboard = () => {
     return `M ${cx} ${cy} L ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY} Z`;
   };
 
-  // Color palette for pie slices
   const pieColors = [
     "#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
     "#ec4899", "#14b8a6", "#f97316", "#6b7280", "#3b82f6"
@@ -249,7 +240,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-page">
-      {/* Page Header */}
       <div className="page-header">
         <div className="header-title">
           <h1>
@@ -264,7 +254,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
       <section className="stats-section">
         <div className="stat-card">
           <div className="stat-icon" style={{ backgroundColor: "#e6f7ff", color: "#1890ff" }}>
@@ -273,15 +262,8 @@ const Dashboard = () => {
           <div className="stat-content">
             <h3>{formatNumber(stats.totalOrders)}</h3>
             <p>Total Orders</p>
-            {stats.orderGrowth !== 0 && (
-              <span className={`stat-trend ${stats.orderGrowth > 0 ? "positive" : "negative"}`}>
-                <i className={`fas fa-${stats.orderGrowth > 0 ? "arrow-up" : "arrow-down"}`}></i>{" "}
-                {Math.abs(stats.orderGrowth)}%
-              </span>
-            )}
           </div>
         </div>
-
         <div className="stat-card">
           <div className="stat-icon" style={{ backgroundColor: "#f6ffed", color: "#52c41a" }}>
             <i className="fas fa-rupee-sign"></i>
@@ -289,15 +271,8 @@ const Dashboard = () => {
           <div className="stat-content">
             <h3>{formatCurrency(stats.totalRevenue)}</h3>
             <p>Total Revenue</p>
-            {stats.revenueGrowth !== 0 && (
-              <span className={`stat-trend ${stats.revenueGrowth > 0 ? "positive" : "negative"}`}>
-                <i className={`fas fa-${stats.revenueGrowth > 0 ? "arrow-up" : "arrow-down"}`}></i>{" "}
-                {Math.abs(stats.revenueGrowth)}%
-              </span>
-            )}
           </div>
         </div>
-
         <div className="stat-card">
           <div className="stat-icon" style={{ backgroundColor: "#fff7e6", color: "#fa8c16" }}>
             <i className="fas fa-users"></i>
@@ -305,15 +280,8 @@ const Dashboard = () => {
           <div className="stat-content">
             <h3>{formatNumber(stats.totalCustomers)}</h3>
             <p>Customers</p>
-            {stats.customerGrowth !== 0 && (
-              <span className={`stat-trend ${stats.customerGrowth > 0 ? "positive" : "negative"}`}>
-                <i className={`fas fa-${stats.customerGrowth > 0 ? "arrow-up" : "arrow-down"}`}></i>{" "}
-                {Math.abs(stats.customerGrowth)}%
-              </span>
-            )}
           </div>
         </div>
-
         <div className="stat-card">
           <div className="stat-icon" style={{ backgroundColor: "#fff1f0", color: "#f5222d" }}>
             <i className="fas fa-box"></i>
@@ -321,93 +289,168 @@ const Dashboard = () => {
           <div className="stat-content">
             <h3>{formatNumber(stats.totalProducts)}</h3>
             <p>Products</p>
-            {stats.productGrowth !== 0 && (
-              <span className={`stat-trend ${stats.productGrowth > 0 ? "positive" : "negative"}`}>
-                <i className={`fas fa-${stats.productGrowth > 0 ? "arrow-up" : "arrow-down"}`}></i>{" "}
-                {Math.abs(stats.productGrowth)}%
-              </span>
-            )}
           </div>
         </div>
       </section>
 
-      {/* Charts Row */}
       <div className="charts-row">
-        <div className="chart-card">
-          <div className="chart-header">
-            <h3>Sales Trend (Last 6 Months)</h3>
-          </div>
-          <div className="chart-body">
-            {salesData.length === 0 ? (
-              <div className="empty-state small">
-                <i className="fas fa-chart-line"></i>
-                <p>No sales data available</p>
-              </div>
-            ) : (
-              <div className="sales-chart-container">
-                <svg className="sales-chart" viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet">
-                  {/* Grid lines */}
-                  <line x1="50" y1="200" x2="550" y2="200" stroke="#e5e7eb" strokeWidth="1" />
-                  <line x1="50" y1="150" x2="550" y2="150" stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 4" />
-                  <line x1="50" y1="100" x2="550" y2="100" stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 4" />
-                  <line x1="50" y1="50" x2="550" y2="50" stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 4" />
+        {/* Bar Chart - Fixed 6 months with UTC */}
+{/* Sales Trend Bar Chart */}
+<div className="chart-card">
+  <div className="chart-header">
+    <h3>Sales Trend (Last 6 Months)</h3>
+  </div>
+  <div className="chart-body">
+    {salesData.length === 0 ? (
+      <div className="empty-state small">
+        <i className="fas fa-chart-bar"></i>
+        <p>No sales data available</p>
+      </div>
+    ) : (
+      <div className="sales-chart-container">
+        <svg
+          className="sales-chart"
+          viewBox="0 0 650 320"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {(() => {
+            const chartLeft = 70;
+            const chartRight = 610;
+            const chartTop = 30;
+            const chartBottom = 250;
+            const chartHeight = chartBottom - chartTop;
+            const chartWidth = chartRight - chartLeft;
 
-                  {/* Y-axis labels */}
-                  <text x="30" y="205" fontSize="10" fill="#6b7280">0</text>
-                  <text x="20" y="155" fontSize="10" fill="#6b7280">{Math.round(Math.max(...salesData.map(d => d.sales)) * 0.25 / 1000)}k</text>
-                  <text x="20" y="105" fontSize="10" fill="#6b7280">{Math.round(Math.max(...salesData.map(d => d.sales)) * 0.5 / 1000)}k</text>
-                  <text x="20" y="55" fontSize="10" fill="#6b7280">{Math.round(Math.max(...salesData.map(d => d.sales)) * 0.75 / 1000)}k</text>
-                  <text x="20" y="10" fontSize="10" fill="#6b7280">{Math.round(Math.max(...salesData.map(d => d.sales)) / 1000)}k</text>
+            const rawMax = Math.max(...salesData.map((d) => d.sales), 0);
+            const roundedMax =
+              rawMax <= 1000
+                ? 1000
+                : Math.ceil(rawMax / 1000) * 1000;
 
-                  {/* X-axis labels */}
-                  {salesData.map((item, i) => {
-                    const x = 80 + i * 80;
-                    return (
-                      <text key={i} x={x} y="220" fontSize="10" fill="#6b7280" textAnchor="middle">
+            const ySteps = 4;
+            const barCount = salesData.length;
+            const groupWidth = chartWidth / barCount;
+            const barWidth = 42;
+
+            const formatYAxis = (value) => {
+              if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+              if (value >= 1000) return `${Math.round(value / 1000)}k`;
+              return value;
+            };
+
+            const formatBarValue = (value) => {
+              if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+              if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
+              return value;
+            };
+
+            return (
+              <>
+                {/* Horizontal Grid Lines + Y Labels */}
+                {[0, 1, 2, 3, 4].map((i) => {
+                  const value = (roundedMax / ySteps) * i;
+                  const y =
+                    chartBottom - (value / roundedMax) * chartHeight;
+
+                  return (
+                    <g key={i}>
+                      <line
+                        x1={chartLeft}
+                        y1={y}
+                        x2={chartRight}
+                        y2={y}
+                        stroke="#e5e7eb"
+                        strokeWidth="1"
+                        strokeDasharray={i === 0 ? "0" : "4 4"}
+                      />
+                      <text
+                        x={chartLeft - 10}
+                        y={y + 4}
+                        fontSize="12"
+                        fill="#6b7280"
+                        textAnchor="end"
+                      >
+                        {formatYAxis(value)}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Bars */}
+                {salesData.map((item, i) => {
+                  const x =
+                    chartLeft + i * groupWidth + (groupWidth - barWidth) / 2;
+                  const barHeight =
+                    roundedMax === 0
+                      ? 0
+                      : (item.sales / roundedMax) * chartHeight;
+                  const y = chartBottom - barHeight;
+
+                  return (
+                    <g key={i}>
+                      {/* Value Label */}
+                      <text
+                        x={x + barWidth / 2}
+                        y={item.sales === 0 ? chartBottom - 8 : y - 8}
+                        fontSize="12"
+                        fill="#4f46e5"
+                        textAnchor="middle"
+                        fontWeight="600"
+                      >
+                        ₹{formatBarValue(item.sales)}
+                      </text>
+
+                      {/* Bar */}
+                      <rect
+                        x={x}
+                        y={y}
+                        width={barWidth}
+                        height={barHeight}
+                        fill="#4f46e5"
+                        rx="8"
+                        ry="8"
+                        style={{
+                          transition: "all 0.3s ease",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={(e) =>
+                          e.target.setAttribute("fill", "#6366f1")
+                        }
+                        onMouseLeave={(e) =>
+                          e.target.setAttribute("fill", "#4f46e5")
+                        }
+                      >
+                        <title>
+                          {`${item.month}: ₹${item.sales.toLocaleString(
+                            "en-IN"
+                          )}`}
+                        </title>
+                      </rect>
+
+                      {/* X Axis Label */}
+                      <text
+                        x={x + barWidth / 2}
+                        y={280}
+                        fontSize="13"
+                        fill="#374151"
+                        textAnchor="middle"
+                        fontWeight="500"
+                      >
                         {item.month}
                       </text>
-                    );
-                  })}
+                    </g>
+                  );
+                })}
+              </>
+            );
+          })()}
+        </svg>
+      </div>
+    )}
+  </div>
+</div>
 
-                  {/* Line connecting points */}
-                  <polyline
-                    points={salesData.map((item, i) => {
-                      const x = 80 + i * 80;
-                      const maxSales = Math.max(...salesData.map(d => d.sales));
-                      const y = 200 - (item.sales / maxSales) * 150;
-                      return `${x},${y}`;
-                    }).join(" ")}
-                    fill="none"
-                    stroke="#4f46e5"
-                    strokeWidth="3"
-                  />
-
-                  {/* Data points */}
-                  {salesData.map((item, i) => {
-                    const x = 80 + i * 80;
-                    const maxSales = Math.max(...salesData.map(d => d.sales));
-                    const y = 200 - (item.sales / maxSales) * 150;
-                    return (
-                      <circle
-                        key={i}
-                        cx={x}
-                        cy={y}
-                        r="5"
-                        fill="#4f46e5"
-                        stroke="white"
-                        strokeWidth="2"
-                      >
-                        <title>₹{item.sales.toLocaleString('en-IN')}</title>
-                      </circle>
-                    );
-                  })}
-                </svg>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Category Distribution Pie Chart */}
+        {/* Pie Chart */}
         <div className="chart-card">
           <div className="chart-header">
             <h3>Category Distribution</h3>
@@ -424,24 +467,23 @@ const Dashboard = () => {
                   <svg viewBox="0 0 200 200">
                     {(() => {
                       const total = categoryData.reduce((sum, cat) => sum + cat.count, 0);
-                      let startAngle = -Math.PI / 2; // start from top
+                      let startAngle = -Math.PI / 2;
                       return categoryData.map((cat, index) => {
                         const percentage = cat.count / total;
                         const endAngle = startAngle + 2 * Math.PI * percentage;
                         const path = describeSlice(100, 100, 80, startAngle, endAngle);
-                        const slice = (
+                        startAngle = endAngle;
+                        return (
                           <path
                             key={cat.category}
                             d={path}
                             fill={pieColors[index % pieColors.length]}
                             stroke="white"
-                            strokeWidth="1"
+                            strokeWidth="2"
                           >
                             <title>{`${cat.category}: ${((cat.count / total) * 100).toFixed(1)}%`}</title>
                           </path>
                         );
-                        startAngle = endAngle;
-                        return slice;
                       });
                     })()}
                     <circle cx="100" cy="100" r="35" fill="white" stroke="none" />
@@ -469,58 +511,26 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Orders, Pending Returns, Top Products */}
       <div className="dashboard-grid">
-        {/* Recent Orders */}
         <div className="dashboard-card recent-orders">
           <div className="card-header">
-            <h3>
-              <i className="fas fa-clock"></i> Recent Orders
-            </h3>
-            {/* "View All" button removed */}
+            <h3><i className="fas fa-clock"></i> Recent Orders</h3>
           </div>
           <div className="card-body">
             {recentOrders.length === 0 ? (
-              <div className="empty-state small">
-                <i className="fas fa-inbox"></i>
-                <p>No recent orders</p>
-              </div>
+              <div className="empty-state small"><i className="fas fa-inbox"></i><p>No recent orders</p></div>
             ) : (
               <table className="mini-table">
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
+                <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
                 <tbody>
                   {recentOrders.map((order) => {
                     const config = getStatusConfig(order.order_status);
                     return (
                       <tr key={order.order_id}>
-                        <td>
-                          <span className="order-id">#{order.order_id}</span>
-                        </td>
-                        <td>
-                          <span className="customer-name">
-                            {order.customer_name || `Customer #${order.user_id}`}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="order-amount">
-                            {formatCurrency(order.total_amount)}
-                          </span>
-                        </td>
-                        <td>
-                          <span
-                            className="status-badge"
-                            style={{ backgroundColor: config.bg, color: config.color }}
-                          >
-                            {config.icon} {order.order_status}
-                          </span>
-                        </td>
+                        <td><span className="order-id">#{order.order_id}</span></td>
+                        <td><span className="customer-name">{order.customer_name || `Customer #${order.user_id}`}</span></td>
+                        <td><span className="order-amount">{formatCurrency(order.total_amount)}</span></td>
+                        <td><span className="status-badge" style={{ backgroundColor: config.bg, color: config.color }}>{config.icon} {order.order_status}</span></td>
                       </tr>
                     );
                   })}
@@ -530,31 +540,19 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Pending Returns */}
         <div className="dashboard-card pending-returns">
           <div className="card-header">
-            <h3>
-              <i className="fas fa-undo-alt"></i> Pending Returns
-            </h3>
-            {/* "Manage" button removed */}
+            <h3><i className="fas fa-undo-alt"></i> Pending Returns</h3>
           </div>
           <div className="card-body">
             {pendingReturns.length === 0 ? (
-              <div className="empty-state small">
-                <i className="fas fa-check-circle"></i>
-                <p>No pending return requests</p>
-              </div>
+              <div className="empty-state small"><i className="fas fa-check-circle"></i><p>No pending return requests</p></div>
             ) : (
               <ul className="return-list">
                 {pendingReturns.map((ret) => (
                   <li key={ret.request_id} className="return-item">
-                    <div className="return-info">
-                      <span className="return-order">Order #{ret.order_id}</span>
-                      <span className="return-customer">{ret.customer_name}</span>
-                    </div>
-                    <span className="return-action">
-                      {ret.action === "return" ? "Return" : "Replace"}
-                    </span>
+                    <div className="return-info"><span className="return-order">Order #{ret.order_id}</span><span className="return-customer">{ret.customer_name}</span></div>
+                    <span className="return-action">{ret.action === "return" ? "Return" : "Replace"}</span>
                   </li>
                 ))}
               </ul>
@@ -562,37 +560,20 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Top Products */}
         <div className="dashboard-card top-products">
           <div className="card-header">
-            <h3>
-              <i className="fas fa-star"></i> Top Products
-            </h3>
-            {/* "View All" button removed */}
+            <h3><i className="fas fa-star"></i> Top Products</h3>
           </div>
           <div className="card-body">
             {topProducts.length === 0 ? (
-              <div className="empty-state small">
-                <i className="fas fa-box-open"></i>
-                <p>No product sales data</p>
-              </div>
+              <div className="empty-state small"><i className="fas fa-box-open"></i><p>No product sales data</p></div>
             ) : (
               <table className="mini-table">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Sold</th>
-                    <th>Revenue</th>
-                  </tr>
-                </thead>
+                <thead><tr><th>Product</th><th>Sold</th><th>Revenue</th></tr></thead>
                 <tbody>
                   {topProducts.map((product) => (
                     <tr key={product.product_id}>
-                      <td>
-                        <div className="product-info">
-                          <span className="product-name">{product.product_name}</span>
-                        </div>
-                      </td>
+                      <td><div className="product-info"><span className="product-name">{product.product_name}</span></div></td>
                       <td>{formatNumber(product.total_sold)}</td>
                       <td>{formatCurrency(product.revenue)}</td>
                     </tr>

@@ -34,3 +34,5 @@ Thumbs.db
 uploads/
 
 backend/invoices/
+backend/public/invoices/
+*.zip

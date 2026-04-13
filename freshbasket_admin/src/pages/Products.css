@@ -1,6 +1,5 @@
-/* Products.css - Clean Professional Dashboard */
+/* Products.css - Clean Professional Dashboard with Larger Modal */
 
-/* Reset & Base */
 * {
   margin: 0;
   padding: 0;
@@ -18,7 +17,6 @@ body {
 
 .products-page {
   min-height: 100vh;
-  background: ;
 }
 
 /* Header */
@@ -28,28 +26,16 @@ body {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.header-content h1 {
+.header-title h1 {
   font-size: 28px;
   font-weight: 700;
   color: #111827;
   margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
 }
 
-.header-icon {
-  font-size: 30px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.header-subtitle {
+.header-title p {
   color: #6b7280;
   font-size: 15px;
-  margin-left: 44px;
-  font-weight: 400;
 }
 
 /* Statistics Section */
@@ -284,21 +270,6 @@ body {
   vertical-align: middle;
 }
 
-.id-cell {
-  width: 120px;
-}
-
-.id-badge {
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-  font-size: 12px;
-  font-weight: 600;
-  color: #374151;
-  background: #f3f4f6;
-  padding: 6px 12px;
-  border-radius: 6px;
-  display: inline-block;
-}
-
 .name-cell {
   min-width: 250px;
 }
@@ -516,7 +487,7 @@ body {
   font-weight: 500;
 }
 
-/* Modal */
+/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -538,11 +509,12 @@ body {
   to { opacity: 1; }
 }
 
+/* LARGER MODAL STYLES */
 .modal {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 500px;
+  max-width: 900px;          /* Increased width */
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -561,7 +533,7 @@ body {
 }
 
 .modal-header {
-  padding: 24px;
+  padding: 24px 28px;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
@@ -569,7 +541,7 @@ body {
 }
 
 .modal-header h3 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
   color: #111827;
 }
@@ -595,7 +567,7 @@ body {
 }
 
 .modal-form {
-  padding: 24px;
+  padding: 28px 32px;
 }
 
 .form-group {
@@ -641,21 +613,23 @@ body {
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
+  margin-bottom: 8px;
 }
 
 /* Image Upload Styles */
 .image-upload-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 10px;
 }
 
 .file-upload-btn {
   display: inline-flex;
   align-items: center;
-  padding: 10px 16px;
+  padding: 10px 18px;
   background: #3b82f6;
   color: white;
   border-radius: 8px;
@@ -825,6 +799,7 @@ body {
   
   .form-row {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
   
   .data-table th,
@@ -840,6 +815,19 @@ body {
   .file-info {
     width: 100%;
   }
+
+  .modal {
+    max-width: calc(100% - 32px);
+    margin: 0 16px;
+  }
+  
+  .modal-form {
+    padding: 20px;
+  }
+  
+  .modal-header {
+    padding: 20px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -847,19 +835,18 @@ body {
     grid-template-columns: 1fr;
   }
   
-  .header-content h1 {
+  .header-title h1 {
     font-size: 24px;
-  }
-  
-  .header-subtitle {
-    margin-left: 0;
   }
   
   .form-actions {
     flex-direction: column;
   }
-  
+}
+
+/* Extra large screens */
+@media (min-width: 1200px) {
   .modal {
-    margin: 0 16px;
+    max-width: 1000px;
   }
 }

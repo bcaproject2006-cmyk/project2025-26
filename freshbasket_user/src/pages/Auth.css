@@ -1033,3 +1033,53 @@
   margin-bottom: 15px;
   font-size: 14px;
 }
+/* WhatsApp opt-in styles */
+.profile-section {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.whatsapp-opt-in-field {
+  padding: 8px 0;
+}
+
+.whatsapp-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.whatsapp-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #25D366; /* WhatsApp green */
+}
+
+.checkbox-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.whatsapp-icon {
+  font-size: 20px;
+}
+
+.whatsapp-note {
+  margin-top: 8px;
+  margin-left: 28px;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.updating-indicator {
+  margin-left: 12px;
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}

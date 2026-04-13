@@ -46,22 +46,20 @@ const Products = () => {
   };
 
   const fetchCategories = async () => {
-  const response = await axios.get(`${BASE_URL}/api/categories`);
-  setCategories(response.data);
-};
+    const response = await axios.get(`${BASE_URL}/api/categories`);
+    setCategories(response.data);
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
       alert("File size too large! Maximum size is 5MB.");
       e.target.value = "";
       return;
     }
 
-    // Validate file type
     const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
       alert("Invalid file type! Please upload JPEG, PNG, JPG, GIF or WebP images.");
@@ -70,15 +68,11 @@ const Products = () => {
     }
 
     setImageFile(file);
-    
-    // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result);
     };
     reader.readAsDataURL(file);
-
-    // Clear any existing URL
     setFormData({...formData, image: ""});
   };
 
@@ -135,10 +129,7 @@ const Products = () => {
   };
 
   const handleDelete = async (product_id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) {
-      return;
-    }
-
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
       await axios.delete(`${BASE_URL}/api/products/${product_id}`);
       alert("Product deleted successfully!");
@@ -158,8 +149,6 @@ const Products = () => {
       image: product.image || "",
       status: product.status || "active"
     });
-    
-    // Set image preview if image exists
     if (product.image) {
       setImagePreview(product.image);
       setImageFile(null);
@@ -167,7 +156,6 @@ const Products = () => {
       setImagePreview("");
       setImageFile(null);
     }
-    
     setEditingId(product.product_id);
     setShowForm(true);
   };
@@ -185,8 +173,6 @@ const Products = () => {
     setImagePreview("");
     setEditingId(null);
     setShowForm(false);
-    
-    // Clear file input
     const fileInput = document.getElementById("imageUpload");
     if (fileInput) fileInput.value = "";
   };
@@ -195,7 +181,6 @@ const Products = () => {
     setImageFile(null);
     setImagePreview("");
     setFormData({...formData, image: ""});
-    
     const fileInput = document.getElementById("imageUpload");
     if (fileInput) fileInput.value = "";
   };
@@ -215,9 +200,7 @@ const Products = () => {
   };
 
   const getProductImage = (product) => {
-    if (product.image) {
-      return product.image;
-    }
+    if (product.image) return product.image;
     return null;
   };
 
@@ -226,11 +209,9 @@ const Products = () => {
                          product.product_id.toString().includes(searchTerm);
     const matchesCategory = categoryFilter === "all" || product.category_id.toString() === categoryFilter;
     const matchesStatus = statusFilter === "all" || product.status === statusFilter;
-    
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  // Calculate statistics
   const totalProducts = products.length;
   const activeProducts = products.filter(p => p.status === "active").length;
   const inactiveProducts = products.filter(p => p.status === "inactive").length;
@@ -253,11 +234,10 @@ const Products = () => {
     <div className="products-page">
       <div className="page-header">
         <div className="header-title">
-          <h1> Products</h1>
+          <h1>Products</h1>
           <p>Product details</p>
         </div>
       </div>
-
 
       {/* Statistics Section */}
       <section className="stats-section">
@@ -268,7 +248,6 @@ const Products = () => {
             <p>Total Products</p>
           </div>
         </div>
-
         <div className="stat-card">
           <div className="stat-icon">✅</div>
           <div className="stat-content">
@@ -276,7 +255,6 @@ const Products = () => {
             <p>Active Products</p>
           </div>
         </div>
-
         <div className="stat-card">
           <div className="stat-icon">⏸️</div>
           <div className="stat-content">
@@ -284,7 +262,6 @@ const Products = () => {
             <p>Inactive Products</p>
           </div>
         </div>
-
         <div className="stat-card">
           <div className="stat-icon">💰</div>
           <div className="stat-content">
@@ -301,7 +278,6 @@ const Products = () => {
             <h2>📋 Products</h2>
             <span className="table-count">{filteredProducts.length} products</span>
           </div>
-          
           <div className="table-controls">
             <div className="search-wrapper">
               <svg className="search-icon" viewBox="0 0 24 24" width="18" height="18">
@@ -315,7 +291,6 @@ const Products = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            
             <select 
               className="filter-select"
               value={categoryFilter}
@@ -328,7 +303,6 @@ const Products = () => {
                 </option>
               ))}
             </select>
-            
             <select 
               className="filter-select"
               value={statusFilter}
@@ -338,7 +312,6 @@ const Products = () => {
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-            
             <button 
               className="icon-button refresh-button"
               onClick={fetchProducts}
@@ -349,7 +322,6 @@ const Products = () => {
                 <path fill="currentColor" d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
               </svg>
             </button>
-            
             <button 
               className="primary-button"
               onClick={() => setShowForm(true)}
@@ -366,7 +338,6 @@ const Products = () => {
           <table className="data-table">
             <thead>
               <tr>
-                {/* <th>ID</th> */}
                 <th>PRODUCT</th>
                 <th>CATEGORY</th>
                 <th>UNIT</th>
@@ -380,9 +351,6 @@ const Products = () => {
                 const productImage = getProductImage(product);
                 return (
                   <tr key={product.product_id}>
-                    {/* <td className="id-cell">
-                      <span className="id-badge">PROD-{String(product.product_id).padStart(3, '0')}</span>
-                    </td> */}
                     <td className="name-cell">
                       <div className="product-cell">
                         <div className="product-image-container">
@@ -424,20 +392,12 @@ const Products = () => {
                     </td>
                     <td className="actions-cell">
                       <div className="action-buttons">
-                        <button 
-                          className="action-button edit"
-                          onClick={() => handleEdit(product)}
-                          title="Edit"
-                        >
+                        <button className="action-button edit" onClick={() => handleEdit(product)} title="Edit">
                           <svg viewBox="0 0 24 24" width="16" height="16">
                             <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                           </svg>
                         </button>
-                        <button 
-                          className="action-button delete"
-                          onClick={() => handleDelete(product.product_id)}
-                          title="Delete"
-                        >
+                        <button className="action-button delete" onClick={() => handleDelete(product.product_id)} title="Delete">
                           <svg viewBox="0 0 24 24" width="16" height="16">
                             <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                           </svg>
@@ -455,10 +415,7 @@ const Products = () => {
               <div className="empty-icon">📦</div>
               <h4>No products found</h4>
               <p>Get started by creating your first product</p>
-              <button 
-                className="primary-button"
-                onClick={() => setShowForm(true)}
-              >
+              <button className="primary-button" onClick={() => setShowForm(true)}>
                 Add Product
               </button>
             </div>
@@ -466,50 +423,49 @@ const Products = () => {
         </div>
       </section>
 
-      {/* Product Form Modal */}
+      {/* Product Form Modal - LARGER VERSION */}
       {showForm && (
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h3>
-                {editingId ? "✏️ Edit Product" : "➕ Add New Product"}
-              </h3>
-              <button className="modal-close" onClick={resetForm}>
-                ×
-              </button>
+              <h3>{editingId ? "✏️ Edit Product" : "➕ Add New Product"}</h3>
+              <button className="modal-close" onClick={resetForm}>×</button>
             </div>
             
             <form onSubmit={handleSubmit} className="modal-form">
-              <div className="form-group">
-                <label htmlFor="category">Category *</label>
-                <select
-                  id="category"
-                  value={formData.category_id}
-                  onChange={(e) => setFormData({...formData, category_id: e.target.value})}
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map(category => (
-                    <option key={category.category_id} value={category.category_id}>
-                      {category.category_name}
-                    </option>
-                  ))}
-                </select>
+              {/* Row 1: Category & Product Name */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="category">Category *</label>
+                  <select
+                    id="category"
+                    value={formData.category_id}
+                    onChange={(e) => setFormData({...formData, category_id: e.target.value})}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map(category => (
+                      <option key={category.category_id} value={category.category_id}>
+                        {category.category_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="productName">Product Name *</label>
+                  <input
+                    type="text"
+                    id="productName"
+                    value={formData.product_name}
+                    onChange={(e) => setFormData({...formData, product_name: e.target.value})}
+                    placeholder="Enter product name"
+                    required
+                    autoFocus
+                  />
+                </div>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="productName">Product Name *</label>
-                <input
-                  type="text"
-                  id="productName"
-                  value={formData.product_name}
-                  onChange={(e) => setFormData({...formData, product_name: e.target.value})}
-                  placeholder="Enter product name"
-                  required
-                  autoFocus
-                />
-              </div>
-
+              {/* Row 2: Unit & Price */}
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="unit">Unit *</label>
@@ -525,7 +481,6 @@ const Products = () => {
                     ))}
                   </select>
                 </div>
-
                 <div className="form-group">
                   <label htmlFor="price">Price (₹) *</label>
                   <input
@@ -541,6 +496,7 @@ const Products = () => {
                 </div>
               </div>
 
+              {/* Image Upload Group */}
               <div className="form-group">
                 <label>Product Image</label>
                 <div className="image-upload-container">
@@ -549,23 +505,13 @@ const Products = () => {
                       <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                     </svg>
                     Choose Image
-                    <input
-                      type="file"
-                      id="imageUpload"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="file-input"
-                    />
+                    <input type="file" id="imageUpload" accept="image/*" onChange={handleImageChange} className="file-input" />
                   </label>
-                  <span className="file-info">
-                    {imageFile ? imageFile.name : "No file chosen"}
-                  </span>
+                  <span className="file-info">{imageFile ? imageFile.name : "No file chosen"}</span>
                 </div>
-                
                 <div className="upload-hint">
                   <small>Max size: 5MB • Supports: JPG, PNG, GIF, WebP</small>
                 </div>
-
                 {(imagePreview || formData.image) && (
                   <div className="image-preview-container">
                     <div className="image-preview">
@@ -578,12 +524,7 @@ const Products = () => {
                           e.target.parentElement.innerHTML = '<div class="preview-error"><i class="fas fa-image"></i> Preview not available</div>';
                         }}
                       />
-                      <button 
-                        type="button" 
-                        onClick={removeImage}
-                        className="remove-image-btn"
-                        title="Remove image"
-                      >
+                      <button type="button" onClick={removeImage} className="remove-image-btn" title="Remove image">
                         <svg viewBox="0 0 24 24" width="14" height="14">
                           <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                         </svg>
@@ -593,6 +534,7 @@ const Products = () => {
                 )}
               </div>
 
+              {/* Status & Actions */}
               <div className="form-group">
                 <label htmlFor="status">Status</label>
                 <select
@@ -609,11 +551,7 @@ const Products = () => {
                 <button type="submit" className="submit-button">
                   {editingId ? "Update Product" : "Add Product"}
                 </button>
-                <button 
-                  type="button" 
-                  onClick={resetForm}
-                  className="cancel-button"
-                >
+                <button type="button" onClick={resetForm} className="cancel-button">
                   Cancel
                 </button>
               </div>
