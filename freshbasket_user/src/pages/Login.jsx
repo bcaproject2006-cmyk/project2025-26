@@ -122,10 +122,6 @@ const Login = () => {
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    alert(`Logging in with ${provider}...`);
-  };
-
   return (
     <div className="auth-page">
       <div className="auth-container">

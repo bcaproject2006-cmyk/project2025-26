@@ -1,5 +1,5 @@
 // pages/Home.jsx - Final (clean, matches product page style, with scroll targets)
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useContext, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { CartContext } from '../context/CartContext';
@@ -7,7 +7,6 @@ import './Home.css';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [timer, setTimer] = useState(30 * 60);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -29,9 +28,9 @@ const Home = () => {
         navigate(location.pathname, { replace: true, state: {} });
       }
     }
-  }, [location.state, navigate]);
+  }, [location.pathname, location.state, navigate]);
 
-  const fallbackSlides = [
+  const fallbackSlides = useMemo(() => [
     {
       title: 'Fresh Groceries Delivered',
       subtitle: 'In 30 Minutes or Less',
@@ -59,7 +58,7 @@ const Home = () => {
       cta: 'Explore Organic',
       link: '/products'
     }
-  ];
+  ], []);
 
   const features = [
     { icon: '⚡', title: '30-Min Delivery', desc: 'Lightning-fast delivery guaranteed' },
@@ -242,7 +241,7 @@ const Home = () => {
     };
 
     fetchData();
-  }, []);
+  }, [fallbackSlides]);
 
   const fetchTodayOrders = async () => {
     try {
@@ -280,19 +279,6 @@ const Home = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, [heroSlides.length]);
-
-  useEffect(() => {
-    const timerInterval = setInterval(() => {
-      setTimer(prev => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timerInterval);
-  }, []);
-
-  const formatTime = useCallback((seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }, []);
 
   const nextSlide = useCallback(() => {
     if (isTransitioning || heroSlides.length === 0) return;

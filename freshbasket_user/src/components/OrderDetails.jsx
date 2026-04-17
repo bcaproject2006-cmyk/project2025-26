@@ -17,7 +17,6 @@ import {
   faTruck,
   faClock,
   faHourglassHalf,
-  faImage,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import API_BASE_URL from "../config";

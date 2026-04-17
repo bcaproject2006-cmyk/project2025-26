@@ -136,14 +136,6 @@ const ProductDetails = () => {
   // Determine stock status
   const availableStock = stockInfo ? Math.floor(stockInfo.current_stock) : 0;
   const inStock = !stockLoading && stockInfo && availableStock > 0;
-  const stockStatusMessage = stockLoading
-    ? 'Checking stock...'
-    : stockError
-    ? 'Stock info unavailable'
-    : inStock
-    ? `In Stock (${availableStock} available)`
-    : 'Out of Stock';
-
   if (loading) {
     return (
       <div className="product-details-loading">

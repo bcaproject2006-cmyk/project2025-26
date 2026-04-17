@@ -175,14 +175,6 @@ const Products = () => {
     navigate(`/product/${productId}`);
   };
 
-  const handleFilterChange = (filterName) => {
-    setFilters(prev => ({ ...prev, [filterName]: !prev[filterName] }));
-  };
-
-  const handleRatingFilter = (rating) => {
-    setFilters(prev => ({ ...prev, rating: prev.rating === rating ? 0 : rating }));
-  };
-
   const handlePriceChange = (e) => {
     const value = parseInt(e.target.value);
     if (e.target.name === 'min') {
