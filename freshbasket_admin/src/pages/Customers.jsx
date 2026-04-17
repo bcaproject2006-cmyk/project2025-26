@@ -8,7 +8,7 @@ const Customers = () => {
   // State for data
   const [customers, setCustomers] = useState([]);
   const [orders, setOrders] = useState([]);
-  // const [rewards, setRewards] = useState([]);
+  const [rewards, setRewards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
