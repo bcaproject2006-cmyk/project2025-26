@@ -8,7 +8,7 @@ const Customers = () => {
   // State for data
   const [customers, setCustomers] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [rewards, setRewards] = useState([]);
+  // const [rewards, setRewards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -99,23 +99,23 @@ const Customers = () => {
     setShowCustomerModal(true);
   };
 
-  const handleEditCustomer = (customer) => {
-    setEditingCustomer(customer);
-    setShowCustomerModal(true);
-  };
+  // const handleEditCustomer = (customer) => {
+  //   setEditingCustomer(customer);
+  //   setShowCustomerModal(true);
+  // };
 
-  const handleDeleteCustomer = async (customerId) => {
-    if (!window.confirm("Delete this customer?")) return;
-    try {
-      const token = getToken();
-      await axios.delete(`${API_BASE}/customers/${customerId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchAllData();
-    } catch (err) {
-      alert("Failed to delete customer.");
-    }
-  };
+  // const handleDeleteCustomer = async (customerId) => {
+  //   if (!window.confirm("Delete this customer?")) return;
+  //   try {
+  //     const token = getToken();
+  //     await axios.delete(`${API_BASE}/customers/${customerId}`, {
+  //       headers: { Authorization: `Bearer ${token}` }
+  //     });
+  //     fetchAllData();
+  //   } catch (err) {
+  //     alert("Failed to delete customer.");
+  //   }
+  // };
 
   const handleCustomerSubmit = async (e) => {
     e.preventDefault();
@@ -148,19 +148,19 @@ const Customers = () => {
   };
 
   // ---------- Payment ----------
-  const openPaymentModal = (customer) => {
-    setPaymentCustomer(customer);
-    setPaymentAmount("");
-    setPaymentDate(new Date().toISOString().split("T")[0]);
-    setShowPaymentModal(true);
-  };
+  // const openPaymentModal = (customer) => {
+  //   setPaymentCustomer(customer);
+  //   setPaymentAmount("");
+  //   setPaymentDate(new Date().toISOString().split("T")[0]);
+  //   setShowPaymentModal(true);
+  // };
 
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     if (!paymentCustomer || !paymentAmount) return;
 
     // Reward points: 10 points per ₹100 spent (floor) – calculated but not used for DB update
-    const pointsEarned = Math.floor(parseFloat(paymentAmount) / 100) * 10;
+    // const pointsEarned = Math.floor(parseFloat(paymentAmount) / 100) * 10;
 
     try {
       const token = getToken();

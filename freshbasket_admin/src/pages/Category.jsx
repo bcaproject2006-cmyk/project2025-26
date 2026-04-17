@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "./Category.css";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+// import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 const Category = () => {
   const BASE_URL = `${process.env.API_BASE_URL}`;
@@ -96,14 +96,14 @@ const Category = () => {
   // Calculate statistics - Always show real data
   const totalCategories = categories.length;
   const totalProducts = categories.reduce((sum, cat) => sum + (cat.product_count || 0), 0);
-  const avgProductsPerCategory = totalCategories > 0 
-    ? (totalProducts / totalCategories).toFixed(1) 
-    : "0.0";
+  // const avgProductsPerCategory = totalCategories > 0 
+  //   ? (totalProducts / totalCategories).toFixed(1) 
+  //   : "0.0";
   
   // Find top category products
-  const topCategoryProducts = categories.length > 0 
-    ? Math.max(...categories.map(cat => cat.product_count || 0))
-    : 0;
+  // const topCategoryProducts = categories.length > 0 
+  //   ? Math.max(...categories.map(cat => cat.product_count || 0))
+  //   : 0;
 
   // Filter categories
   const filteredCategories = categories.filter(category =>
@@ -112,16 +112,16 @@ const Category = () => {
   );
 
   // Prepare chart data
-  const chartData = [...categories]
-    .sort((a, b) => (b.product_count || 0) - (a.product_count || 0))
-    .slice(0, 5)
-    .map(cat => ({
-      name: cat.category_name,
-      products: cat.product_count || 0,
-    }));
+  // const chartData = [...categories]
+  //   .sort((a, b) => (b.product_count || 0) - (a.product_count || 0))
+  //   .slice(0, 5)
+  //   .map(cat => ({
+  //     name: cat.category_name,
+  //     products: cat.product_count || 0,
+  //   }));
 
   // Colors for charts
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+  // const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   if (loading && categories.length === 0) {
     return (

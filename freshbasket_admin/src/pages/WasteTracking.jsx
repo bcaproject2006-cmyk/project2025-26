@@ -6,7 +6,7 @@ import './WasteTracking.css';
 const API_BASE_URL = `${process.env.REACT_APP_API_BASE_URL}`;
 
 const WasteTracking = () => {
-  const [dateRange, setDateRange] = useState('thisMonth');
+  // const [dateRange, setDateRange] = useState('thisMonth');
   const [wasteEntries, setWasteEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

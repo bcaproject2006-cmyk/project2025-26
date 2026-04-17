@@ -17,7 +17,7 @@ const Returns = () => {
 
   const navigate = useNavigate();
 
-  const statuses = ['pending', 'approved', 'rejected'];
+  // const statuses = ['pending', 'approved', 'rejected'];
 
   useEffect(() => {
     fetchReturnRequests();

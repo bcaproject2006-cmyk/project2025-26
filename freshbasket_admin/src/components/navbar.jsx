@@ -34,7 +34,7 @@ const Navbar = ({ toggleSidebar, sidebarOpen, onLogout }) => {
 
   const user = getUserInfo();
   const userName = user?.name || "Admin";
-  const userEmail = user?.email || "admin@freshbasket.com";
+  // const userEmail = user?.email || "admin@freshbasket.com";
   const userRole = user?.role || "Administrator";
 
   /* Fetch notifications from API */

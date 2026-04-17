@@ -106,10 +106,10 @@ const StockIn = () => {
   };
 
   // Calculate current stock for each product (sum of all entries)
-  const getProductStock = (productId) => {
-    const entries = stockEntries.filter(e => e.product_id === productId);
-    return entries.reduce((sum, e) => sum + parseFloat(e.quantity || 0), 0);
-  };
+  // const getProductStock = (productId) => {
+  //   const entries = stockEntries.filter(e => e.product_id === productId);
+  //   return entries.reduce((sum, e) => sum + parseFloat(e.quantity || 0), 0);
+  // };
 
   // Derived data
   const categoryMap = useMemo(() => 
@@ -223,7 +223,7 @@ const StockIn = () => {
 
   // Helpers
   const formatCurrency = (amount) => `₹${parseFloat(amount || 0).toFixed(2)}`;
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-GB');
+  // const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-GB');
 
   // Selection state
   const allSelected = filteredProducts.length > 0 && 

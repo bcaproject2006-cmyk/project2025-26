@@ -31,7 +31,7 @@ const CurrentStock = () => {
   };
 
   const formatNumber = (num) => num.toFixed(2);
-  const formatCurrency = (num) => `₹${num.toFixed(2)}`;
+  // const formatCurrency = (num) => `₹${num.toFixed(2)}`;
 
   const filteredStock = stockData.filter(item =>
     item.product_name.toLowerCase().includes(searchTerm.toLowerCase())

@@ -233,7 +233,7 @@ const Billing = () => {
             );
             const deliveryFee = parseFloat(selectedInvoice.delivery_fee || 0);
             const discount = parseFloat(selectedInvoice.discount || 0);
-            const grandTotal = parseFloat(selectedInvoice.total_amount || 0);
+            // const grandTotal = parseFloat(selectedInvoice.total_amount || 0);
 
             return (
               <>
