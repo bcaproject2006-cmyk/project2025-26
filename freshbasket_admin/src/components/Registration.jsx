@@ -97,7 +97,7 @@ const Registration = () => {
       console.log('🔄 Sending registration request...');
       console.log('Data:', formData);
       
-      const response = await fetch('http://localhost:8000/api/users/register', {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ const Registration = () => {
       let errorMessage = err.message;
       
       if (err.message.includes('Failed to fetch')) {
-        errorMessage = 'Cannot connect to server. Please make sure backend is running on http://localhost:8000';
+        errorMessage = 'Cannot connect to server. Please make sure backend is running on ${process.env.REACT_APP_API_BASE_URL}';
       } else if (err.message.includes('NetworkError')) {
         errorMessage = 'Network error. Please check your internet connection.';
       } else if (err.message.includes('invalid JSON')) {

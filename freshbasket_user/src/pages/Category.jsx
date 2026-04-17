@@ -161,7 +161,7 @@ const Checkout = () => {
     if (paymentMethod === 'cod') {
       try {
         const response = await axios.post(
-          'http://localhost:8000/api/orders',
+          `${process.env.REACT_APP_API_BASE_URL}/api/orders`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -198,7 +198,7 @@ const Checkout = () => {
         }
 
         const orderResponse = await axios.post(
-          'http://localhost:8000/api/create-razorpay-order',
+          `${process.env.REACT_APP_API_BASE_URL}/api/create-razorpay-order`,
           {
             amount: finalTotal * 100,
             currency: 'INR',
@@ -219,7 +219,7 @@ const Checkout = () => {
           handler: async (response) => {
             try {
               const verificationResponse = await axios.post(
-                'http://localhost:8000/api/verify-razorpay-payment',
+                `${process.env.REACT_APP_API_BASE_URL}/api/verify-razorpay-payment`,
                 {
                   razorpay_order_id: response.razorpay_order_id,
                   razorpay_payment_id: response.razorpay_payment_id,

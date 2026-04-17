@@ -36,7 +36,7 @@ const Help = () => {
     const fetchFAQs = async () => {
       try {
         setFaqsLoading(true);
-        const response = await axios.get('http://localhost:8000/api/faqs');
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/faqs`);
         setFaqs(response.data);
         setFaqsError(null);
       } catch (error) {
@@ -104,7 +104,7 @@ const Help = () => {
 
     try {
       // Send POST request to your backend endpoint
-      const response = await axios.post('http://localhost:8000/api/contact-messages', formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/contact-messages`, formData);
       if (response.status === 200 || response.status === 201) {
         setFormSuccess('Thank you for contacting us! We will get back to you soon.');
         setFormData({ name: '', email: '', message: '' }); // Reset form

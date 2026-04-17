@@ -31,7 +31,7 @@ const Returns = () => {
         navigate('/login');
         return;
       }
-      const res = await fetch('http://localhost:8000/api/return-requests', {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/return-requests`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -61,10 +61,10 @@ const Returns = () => {
     const token = localStorage.getItem('token');
     try {
       const [itemsRes, imagesRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/return-requests/${requestId}/items`, {
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/api/return-requests/${requestId}/items`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch(`http://localhost:8000/api/return-requests/${requestId}/images`, {
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/api/return-requests/${requestId}/images`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);
@@ -96,7 +96,7 @@ const Returns = () => {
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/return-requests/${requestId}/approve`, {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/return-requests/${requestId}/approve`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -122,7 +122,7 @@ const Returns = () => {
     const token = localStorage.getItem('token');
     setActionLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/return-requests/${requestId}/reject`, {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/return-requests/${requestId}/reject`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -435,7 +435,7 @@ const Returns = () => {
                   <div className="image-previews">
                     {requestImages.map((img, idx) => (
                       <div key={idx} className="preview-item">
-                        <img src={`http://localhost:8000/${img.image_path}`} alt="return" />
+                        <img src={`${process.env.REACT_APP_API_BASE_URL}/${img.image_path}`} alt="return" />
                       </div>
                     ))}
                   </div>

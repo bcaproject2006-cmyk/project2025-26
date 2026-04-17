@@ -5,7 +5,7 @@ import './LoyaltyOffers.css';
 
 const LoyaltyOffers = () => {
 
-  const BASE_URL = "http://localhost:8000/api";
+  const BASE_URL = `${process.env.REACT_APP_API_BASE_URL}/api`;
 
   const [activeTab, setActiveTab] = useState('active');
 

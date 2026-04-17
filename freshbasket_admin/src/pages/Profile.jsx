@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = `${process.env.REACT_APP_API_BASE_URL}/api`;
 
 const Profile = () => {
   const [user, setUser] = useState(null);

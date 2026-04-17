@@ -44,7 +44,7 @@ const Cart = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      const response = await axios.get('http://localhost:8000/api/customers/profile', {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/customers/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAvailablePoints(response.data.reward_points || 0);
@@ -55,7 +55,7 @@ const Cart = () => {
 
   const fetchOffersCount = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/loyalty/offers');
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/loyalty/offers`);
       const activeOffers = response.data.filter(offer => offer.status === 'active');
       setOffersCount(activeOffers.length);
     } catch (error) {

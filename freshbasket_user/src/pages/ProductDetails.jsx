@@ -25,7 +25,7 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:8000/api/products/${id}`);
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/products/${id}`);
         
         const formattedProduct = {
           id: response.data.product_id,
@@ -45,7 +45,7 @@ const ProductDetails = () => {
         
         // Fetch related products
         if (response.data.category_id) {
-          const relatedRes = await axios.get(`http://localhost:8000/api/products`);
+          const relatedRes = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/products`);
           const related = relatedRes.data
             .filter(p => p.category_id === response.data.category_id && p.product_id !== response.data.product_id)
             .slice(0, 4)
@@ -77,7 +77,7 @@ const ProductDetails = () => {
       setStockLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:8000/api/current-stock', {
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/current-stock`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         // Find stock info for this product
@@ -181,9 +181,9 @@ const ProductDetails = () => {
                product.image.includes('.jpeg') ||
                product.image.includes('.webp') ||
                product.image.includes('.gif')) {
-        return `http://localhost:8000/${product.image.replace(/^\/+/, '')}`;
+        return `${process.env.REACT_APP_API_BASE_URL}/${product.image.replace(/^\/+/, '')}`;
       } else if (product.image.length > 10) {
-        return `http://localhost:8000/api/images/${product.image}`;
+        return `${process.env.REACT_APP_API_BASE_URL}/api/images/${product.image}`;
       }
     }
     return null;

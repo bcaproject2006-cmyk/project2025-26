@@ -43,7 +43,7 @@ const Login = ({ onLogin }) => {
     try {
       console.log('Attempting login with:', formData.email);
 
-      const response = await fetch("http://localhost:8000/api/users/login", {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

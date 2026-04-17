@@ -65,7 +65,7 @@ const StockIn = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/categories');
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/categories`);
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -75,7 +75,7 @@ const StockIn = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/products');
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/products`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -86,7 +86,7 @@ const StockIn = () => {
   const fetchStockEntries = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:8000/api/stock');
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/stock`);
       setStockEntries(response.data);
     } catch (error) {
       console.error('Error fetching stock:', error);
@@ -98,7 +98,7 @@ const StockIn = () => {
 
   const fetchAlerts = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/stock/alerts');
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/stock/alerts`);
       setAlerts(response.data);
     } catch (error) {
       console.error('Error fetching alerts:', error);
@@ -200,7 +200,7 @@ const StockIn = () => {
     setSubmitLoading(true);
     try {
       await Promise.all(updates.map(update =>
-        axios.post('http://localhost:8000/api/stock', update)
+        axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/stock`, update)
       ));
       showToast(`Stock updated for ${updates.length} product(s)!`);
       const cleared = { ...stockUpdates };

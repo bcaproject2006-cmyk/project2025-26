@@ -41,7 +41,7 @@ const Navbar = ({ toggleSidebar, sidebarOpen, onLogout }) => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/notifications");
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/notifications`);
         const data = await res.json();
         const formatted = data
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))

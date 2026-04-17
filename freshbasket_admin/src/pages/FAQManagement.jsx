@@ -10,7 +10,7 @@ const FAQManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
-  const API_URL = "http://localhost:8000";
+  const API_URL = `${process.env.REACT_APP_API_BASE_URL}`;
 
   const fetchFAQs = async () => {
     try {

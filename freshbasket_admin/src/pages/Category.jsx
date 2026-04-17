@@ -4,7 +4,7 @@ import "./Category.css";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 const Category = () => {
-  const BASE_URL = "http://localhost:8000";
+  const BASE_URL = `${process.env.API_BASE_URL}`;
 
   const [formData, setFormData] = useState({
     category_name: "",

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import './Auth.css'; // shared auth styles
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = `${process.env.REACT_APP_API_BASE_URL}/api`;
 
 const ForgotPassword = () => {
   const { type = 'customers' } = useParams(); // 'customers' or 'users'

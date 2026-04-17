@@ -24,7 +24,7 @@ const Notifications = () => {
         navigate('/login');
         return;
       }
-      const res = await fetch('http://localhost:8000/api/notifications', {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/notifications`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -62,7 +62,7 @@ const Notifications = () => {
     if (!notification) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/api/notifications/${id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/notifications/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -93,7 +93,7 @@ const Notifications = () => {
     if (!window.confirm('Delete this notification?')) return;
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`http://localhost:8000/api/notifications/${id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/notifications/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

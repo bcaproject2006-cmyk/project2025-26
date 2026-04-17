@@ -22,7 +22,7 @@ const LoyaltyOffers = () => {
     const fetchOffers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:8000/api/loyalty/offers');
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/loyalty/offers`);
         
         // Format all offers
         const formattedOffers = response.data.map((offer, index) => {

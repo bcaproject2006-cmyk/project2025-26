@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './CurrentStock.css';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = `${process.env.REACT_APP_API_BASE_URL}`;
 
 const CurrentStock = () => {
   const [stockData, setStockData] = useState([]);

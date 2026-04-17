@@ -72,12 +72,12 @@ const Dashboard = () => {
         returnsRes,
         orderItemsRes,
       ] = await Promise.all([
-        fetch("http://localhost:8000/api/orders", { headers }),
-        fetch("http://localhost:8000/api/customers", { headers }),
-        fetch("http://localhost:8000/api/products", { headers }),
-        fetch("http://localhost:8000/api/categories", { headers }),
-        fetch("http://localhost:8000/api/return-requests", { headers }),
-        fetch("http://localhost:8000/api/order-items", { headers }),
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/api/orders`, { headers }),
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/api/customers`, { headers }),
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/api/products`, { headers }),
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/api/categories`, { headers }),
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/api/return-requests`, { headers }),
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/api/order-items`, { headers }),
       ]);
 
       if (ordersRes.status === 401 || customersRes.status === 401) {

@@ -36,9 +36,9 @@ const Products = () => {
       try {
         setLoading(true);
         const [categoriesRes, productsRes, stockRes] = await Promise.all([
-          axios.get('http://localhost:8000/api/categories'),
-          axios.get('http://localhost:8000/api/products'),
-          axios.get('http://localhost:8000/api/current-stock')
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/categories`),
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/products`),
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/current-stock`)
         ]);
 
         const formattedCategories = [
@@ -67,12 +67,12 @@ const Products = () => {
                      product.image.includes('.webp') ||
                      product.image.includes('.gif')) {
               if (!product.image.startsWith('http')) {
-                productImage = `http://localhost:8000/${product.image.replace(/^\/+/, '')}`;
+                productImage = `${process.env.REACT_APP_API_BASE_URL}/${product.image.replace(/^\/+/, '')}`;
               } else {
                 productImage = product.image;
               }
             } else if (product.image.length > 10) {
-              productImage = `http://localhost:8000/api/images/${product.image}`;
+              productImage = `${process.env.REACT_APP_API_BASE_URL}/api/images/${product.image}`;
             }
           }
 

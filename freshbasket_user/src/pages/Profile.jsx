@@ -25,7 +25,7 @@ const Profile = () => {
     }
 
     try {
-      const response = await axios.get('http://localhost:8000/api/customers/profile', {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/customers/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(response.data);
@@ -47,7 +47,7 @@ const Profile = () => {
     if (!token) return;
 
     try {
-      const response = await axios.get('http://localhost:8000/api/customers/whatsapp/status', {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/customers/whatsapp/status`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setWhatsappOptIn(response.data.whatsapp_opt_in || false);
@@ -67,7 +67,7 @@ const Profile = () => {
     
     try {
       await axios.post(
-        `http://localhost:8000/api/customers/whatsapp/${endpoint}`,
+        `${process.env.REACT_APP_API_BASE_URL}/api/customers/whatsapp/${endpoint}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

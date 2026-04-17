@@ -12,7 +12,7 @@ const OrderSuccess = () => {
     const fetchOrder = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:8000/api/orders/${orderId}`, {
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/orders/${orderId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to fetch order');
@@ -32,7 +32,7 @@ const OrderSuccess = () => {
     setDownloading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/invoices/${orderId}/download`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${orderId}/download`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

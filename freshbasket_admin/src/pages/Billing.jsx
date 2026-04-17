@@ -3,7 +3,7 @@ import axios from "axios";
 import "./Billing.css";
 
 const Billing = () => {
-  const BASE_URL = "http://localhost:8000/api";
+  const BASE_URL = `${process.env.REACT_APP_API_BASE_URL}/api`;
 
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(false);

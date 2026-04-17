@@ -49,7 +49,7 @@ const Orders = () => {
       // Fetch all customers to build a lookup map (admin only)
       let customerMap = {};
       try {
-        const customersResponse = await fetch('http://localhost:8000/api/customers', {
+        const customersResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/customers`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (customersResponse.ok) {
@@ -63,7 +63,7 @@ const Orders = () => {
         console.warn('Could not fetch customer details, proceeding without names');
       }
 
-      const response = await fetch('http://localhost:8000/api/orders', {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -123,7 +123,7 @@ const Orders = () => {
   const fetchReturnRequests = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:8000/api/return-requests', {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/return-requests`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -206,7 +206,7 @@ const Orders = () => {
         discount: orderToUpdate.discount || 0
       };
 
-      const response = await fetch(`http://localhost:8000/api/orders/${orderId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/orders/${orderId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -265,7 +265,7 @@ const Orders = () => {
   const handleApproveReturn = async (requestId) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`http://localhost:8000/api/return-requests/${requestId}/approve`, {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/return-requests/${requestId}/approve`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -286,7 +286,7 @@ const Orders = () => {
   const handleRejectReturn = async (requestId) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`http://localhost:8000/api/return-requests/${requestId}/reject`, {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/return-requests/${requestId}/reject`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -312,7 +312,7 @@ const Orders = () => {
     try {
       const token = localStorage.getItem('token');
 
-      const itemsResponse = await fetch(`http://localhost:8000/api/orders/${orderId}/items`, {
+      const itemsResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/orders/${orderId}/items`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -325,7 +325,7 @@ const Orders = () => {
       }
 
       // Fetch return request for this order
-      const returnRes = await fetch(`http://localhost:8000/api/return-requests/order/${orderId}`, {
+      const returnRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/return-requests/order/${orderId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (returnRes.ok) {

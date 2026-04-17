@@ -4,7 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api'; // ✅ base URL with /api
+const API_URL = `${process.env.REACT_APP_API_BASE_URL}/api`;
+console.log(API_URL);
+
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -60,7 +62,7 @@ const Login = () => {
     try {
       // ✅ Correct endpoint: /api/customers/login
       const response = await axios.post(
-        `${API_BASE_URL}/customers/login`,
+        `${API_URL}/customers/login`,
         {
           email: formData.email,
           password: formData.password

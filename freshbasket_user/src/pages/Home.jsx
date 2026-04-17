@@ -73,9 +73,9 @@ const Home = () => {
       try {
         setLoading(true);
         const [categoriesRes, allProductsRes, offersRes] = await Promise.all([
-          axios.get('http://localhost:8000/api/categories'),
-          axios.get('http://localhost:8000/api/products'),
-          axios.get('http://localhost:8000/api/loyalty/offers')
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/categories`),
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/products`),
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/loyalty/offers`)
         ]);
 
         const formattedCategories = categoriesRes.data.map((cat, index) => {
@@ -108,9 +108,9 @@ const Home = () => {
             if (product.image.startsWith('http') || product.image.startsWith('data:image') || product.image.startsWith('/')) {
               productImage = product.image;
             } else if (product.image.includes('.jpg') || product.image.includes('.png') || product.image.includes('.jpeg')) {
-              productImage = `http://localhost:8000/uploads/${product.image.replace(/^\/+/, '')}`;
+              productImage = `${process.env.REACT_APP_API_BASE_URL}/uploads/${product.image.replace(/^\/+/, '')}`;
             } else if (product.image.length > 10) {
-              productImage = `http://localhost:8000/api/images/${product.image}`;
+              productImage = `${process.env.REACT_APP_API_BASE_URL}/api/images/${product.image}`;
             } else {
               productImage = product.image;
             }
@@ -249,7 +249,7 @@ const Home = () => {
       const token = localStorage.getItem("token");
 
       const res = await axios.get(
-        'http://localhost:8000/api/orders/today/count',
+        `${process.env.REACT_APP_API_BASE_URL}/api/orders/today/count`,
         {
           headers: {
             Authorization: `Bearer ${token}`

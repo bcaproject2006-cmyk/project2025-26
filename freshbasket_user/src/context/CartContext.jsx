@@ -55,7 +55,7 @@ export const CartProvider = ({ children }) => {
 
   const fetchValidOffers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/loyalty/offers');
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/loyalty/offers`);
       const activeOffers = response.data.filter(offer => offer.status === 'active');
       
       // Convert offers to a lookup object

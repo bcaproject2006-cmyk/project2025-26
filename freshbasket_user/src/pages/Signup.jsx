@@ -98,7 +98,7 @@ const Signup = () => {
     console.log('Submitting payload:', payload);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/customers', payload);
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/customers`, payload);
       alert(response.data.message || 'Account created successfully!');
       navigate('/login');
     } catch (error) {
